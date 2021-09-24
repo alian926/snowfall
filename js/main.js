@@ -28,7 +28,8 @@ let GRAVITY_SPEED = 1.5;
 const simplex = new SimplexNoise();
 
 function setup() {
-	loadImage('img/sn.png').then((img) => (spritesheet = img));
+	loadImage('img/sn.png')
+		.then((img) => (spritesheet = img))
 
 	// ?sprite_scale=1.0&max_flakes=100&wind_scale=1&wind_density=1
 	const _qs = new URLSearchParams(location.search);
@@ -111,6 +112,7 @@ function draw(e) {
 	const time = e * 0.001;
 	const windTime = time * 0.1 * WIND_DENSITY;
 	beginPath();
+  background(_fillStyle || COLOR_BLACK);
 	for (let i = flakes.length - 1; i >= 0; i--) {
 		const f = flakes[i];
 		f.update(time, windTime);
@@ -123,7 +125,7 @@ function draw(e) {
 			f.randomize();
 		}
 	}
-	stroke(hsl(0, 0, 100));
+	// stroke(hsl(0, 0, 100));
 }
 
 const sclRngs = [
@@ -199,7 +201,6 @@ class Snowflake {
 			size,
 			size
 		);
-
 		pop();
 	}
 }

@@ -172,7 +172,9 @@ let _anim,
 	width_half,
 	height_half,
 	width_quarter,
-	height_quarter;
+	height_quarter,
+	_fillStyle,
+	_backgroundImage;
 let _canvasCurrentlyCentered = false;
 let mouseUpdate = -Infinity,
 	mouseIn = false,
@@ -200,6 +202,7 @@ function updateMouse(e) {
 		mousePosPrev.set(mousePos);
 		mousePos.set(x, y);
 	}
+	// console.log({ x, y, winX: e.clientX, winY: e.clientY, id: e.identifier });
 	// return { x, y, winX: e.clientX, winY: e.clientY, id: e.identifier };
 }
 
@@ -227,43 +230,44 @@ function updateMouse(e) {
 // 	cb(e);
 // }));
 
-canvas.addEventListener(
-	'mouseenter',
-	(e) => (updateMouse(e), (mouseIn = true))
-);
-canvas.addEventListener(
-	'mouseleave',
-	(e) => (updateMouse(e), (mouseIn = false), (mouseDown = false))
-);
-canvas.addEventListener(
-	'mousemove',
-	(e) => (updateMouse(e), (mouseIn = true), (mouseMove = e.timeStamp))
-);
-canvas.addEventListener(
-	'mousedown',
-	(e) => (updateMouse(e), (mouseIn = true), (mouseDown = true))
-);
-canvas.addEventListener(
-	'mouseup',
-	(e) => (updateMouse(e), (mouseDown = false))
-);
-canvas.addEventListener(
-	'touchstart',
-	(e) => (updateMouse(e), (mouseIn = true))
-);
-canvas.addEventListener(
-	'touchend',
-	(e) => (updateMouse(e), (mouseIn = false), (mouseDown = false))
-);
-canvas.addEventListener(
-	'touchcancel',
-	(e) => (updateMouse(e), (mouseIn = false), (mouseDown = false))
-);
-canvas.addEventListener('touchmove', (e) => (updateMouse(e), (mouseIn = true)));
+// canvas.addEventListener(
+// 	'mouseenter',
+// 	(e) => (updateMouse(e), (mouseIn = true))
+// );
+// canvas.addEventListener(
+// 	'mouseleave',
+// 	(e) => (updateMouse(e), (mouseIn = false), (mouseDown = false))
+// );
+// canvas.addEventListener(
+// 	'mousemove',
+// 	(e) => (updateMouse(e), (mouseIn = true), (mouseMove = e.timeStamp))
+// );
+// canvas.addEventListener(
+// 	'mousedown',
+// 	(e) => (updateMouse(e), (mouseIn = true), (mouseDown = true))
+// );
+// canvas.addEventListener(
+// 	'mouseup',
+// 	(e) => (updateMouse(e), (mouseDown = false))
+// );
+// canvas.addEventListener(
+// 	'touchstart',
+// 	(e) => (updateMouse(e), (mouseIn = true))
+// );
+// canvas.addEventListener(
+// 	'touchend',
+// 	(e) => (updateMouse(e), (mouseIn = false), (mouseDown = false))
+// );
+// canvas.addEventListener(
+// 	'touchcancel',
+// 	(e) => (updateMouse(e), (mouseIn = false), (mouseDown = false))
+// );
+// canvas.addEventListener('touchmove', (e) => (updateMouse(e), (mouseIn = true)));
 window.addEventListener('resize', _resizeCanvas);
 window.addEventListener('load', () => {
-	mousePos = createVector();
-	mousePosPrev = createVector();
+	// debugger
+	// mousePos = createVector();
+	// mousePosPrev = createVector();
 	Object.assign(
 		_canvasOptions,
 		_defaulCanvasOptions,
@@ -275,7 +279,7 @@ window.addEventListener('load', () => {
 	_resizeCanvas();
 	if ('setup' in window) {
 		window.setup();
-    window.initControls();
+		window.initControls();
 	}
 	frameCount = 0;
 	_anim = requestAnimationFrame(_draw);
@@ -310,10 +314,15 @@ function _resizeCanvas(specificCanvas) {
 		_canvasOptions.height !== null ? _canvasOptions.height : window.innerHeight;
 	width_quarter = (width_half = width * HALF) * HALF;
 	height_quarter = (height_half = height * HALF) * HALF;
-	ctx.fillStyle = 'hsl(0, 0%, 100%)';
-	ctx.strokeStyle = 'hsl(0, 0%, 100%)';
+	ctx.fillStyle = COLOR_BLACK;
+	ctx.strokeStyle = COLOR_BLACK;
+	if (_backgroundImage) {
+		clipImage(_backgroundImage.src, width, height).then((img) => {
+			_fillStyle = ctx.createPattern(img, 'no-repeat');
+		});
+	}
 	if ('onResize' in window) {
-		window.onResize();
+		// window.onResize();
 	}
 }
 
@@ -908,28 +917,28 @@ function regularPolygon(sides, radius = 50, rotation = 0) {
 	ctx.closePath();
 }
 
-function genRegularPolygon(sides = 3, radius = 50, rotation = 0) {
-	let iSizes = (1 / sides) * TAU;
-	let data = {
-		sides,
-		radius,
-		rotation,
-		points: [],
-	};
-	for (let i = 0; i < sides; i++) {
-		let t = i * iSizes + rotation;
-		let x = cos(t) * radius;
-		let y = sin(t) * radius;
-		let point = createVector(x, y);
-		Object.assign(point, { i, t });
-		data.points.push(point);
-	}
-	return data;
-}
+// function genRegularPolygon(sides = 3, radius = 50, rotation = 0) {
+// 	let iSizes = (1 / sides) * TAU;
+// 	let data = {
+// 		sides,
+// 		radius,
+// 		rotation,
+// 		points: [],
+// 	};
+// 	for (let i = 0; i < sides; i++) {
+// 		let t = i * iSizes + rotation;
+// 		let x = cos(t) * radius;
+// 		let y = sin(t) * radius;
+// 		let point = createVector(x, y);
+// 		Object.assign(point, { i, t });
+// 		data.points.push(point);
+// 	}
+// 	return data;
+// }
 
-function isPreviewEmbed() {
-	return location.href.includes('/fullcpgrid/');
-}
+// function isPreviewEmbed() {
+// 	return location.href.includes('/fullcpgrid/');
+// }
 
 function loadImage(url) {
 	return new Promise((resolve, reject) => {
@@ -978,20 +987,20 @@ function getImageData(img, ...args) {
 	}
 }
 
-function xyToI(x, y, w, h) {
-	if (typeof x !== 'number' && 'x' in x) {
-		h = w;
-		w = y;
-		({ x, y } = x);
-	}
-	if (w === undefined) w = 1;
-	// if(h === undefined) h = Infinity;
-	return x + w * y;
-}
+// function xyToI(x, y, w, h) {
+// 	if (typeof x !== 'number' && 'x' in x) {
+// 		h = w;
+// 		w = y;
+// 		({ x, y } = x);
+// 	}
+// 	if (w === undefined) w = 1;
+// 	// if(h === undefined) h = Infinity;
+// 	return x + w * y;
+// }
 
-function iToXY(i, w, h) {
-	return createVector(i % w, floor(i / w));
-}
+// function iToXY(i, w, h) {
+// 	return createVector(i % w, floor(i / w));
+// }
 
 function random(low = 1, high = null) {
 	if (Array.isArray(low)) {
